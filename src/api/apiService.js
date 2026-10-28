@@ -7,6 +7,7 @@ const apiService = async (httpMethod, url, reqBody, reqHeader) => {
     data: reqBody,
     headers: reqHeader,
   }
+  console.log("reqBody",reqBody)
   try {
     const response = await axiosInstance(reqConfig)
     return response

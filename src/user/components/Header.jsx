@@ -1,13 +1,27 @@
-import React, { useState } from "react";
-
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-
 import { FaInstagram, FaTwitter, FaFacebookF, FaUser } from "react-icons/fa";
-
 import { IoMenu } from "react-icons/io5";
+import { FaGear } from "react-icons/fa6";
+import { FaPowerOff } from "react-icons/fa6";
+import axiosInstance from "../../api/axiosInstance";
 
 function Header() {
   const [toggle, setToggle] = useState(false);
+  const [dp, setDp] = useState("");
+  const [token, setToken] = useState("");
+  const [userId, setUserId] = useState("");
+  const [dropDown, setDropDown] = useState(false);
+
+  useEffect(() => {
+    if (sessionStorage.getItem("token") && sessionStorage.getItem("user")) {
+      const userToken = sessionStorage.getItem("token");
+      const user = JSON.parse(sessionStorage.getItem("user"));
+      setToken(userToken);
+      setDp(user.picture);
+      setUserId(user._id);
+    }
+  }, [token]);
 
   return (
     <>
@@ -39,13 +53,55 @@ function Header() {
           <FaFacebookF />
 
           {/* Login Link */}
-          <Link
-            to="/login"
-            className="border border-black rounded px-3 ms-3 flex items-center"
-          >
-            <FaUser className="me-1" />
-            Login
-          </Link>
+          {!token ? (
+            <Link
+              to="/login"
+              className="border border-black rounded px-3 ms-3 flex items-center"
+            >
+              <FaUser className="me-1" />
+              Login
+            </Link>
+          ) : (
+            <div>
+              <button
+                onClick={() => setDropDown(!dropDown)}
+                className="rounded p-1 hover:bg-gray-100"
+              >
+                <img
+                  width={"40px"}
+                  height={"40px"}
+                  style={{ borderRadius: "50%" }}
+                  src={
+                    dp == ""
+                      ? "https://static.vecteezy.com/system/resources/previews/019/879/186/non_2x/user-icon-on-transparent-background-free-png.png"
+                      : dp.startsWith("https://lh3.googleusercontent.com/")
+                        ? dp
+                        : `${axiosInstance.defaults.baseURL}/uploads/${dp}`
+                  }
+                  alt="Profile"
+                />
+              </button>
+              {/* dropdownmenu */}
+              {dropDown && (
+                <div className="absolute right-4 z-10 mt-2 w-40 bg-white shadow rounded ring-1 ring-black/5 p-2 focus:outline-hidden">
+                  {/* Profile */}
+                  <Link
+                    to={`/profile/${userId}`}
+                    className="flex items-center text-gray-600 text-sm px-3 py-2"
+                  >
+                    <FaGear className="text-gray-500" />
+                    Profile
+                  </Link>
+
+                  {/* Logout */}
+                  <button className="flex items-center text-gray-600 text-sm px-3 py-2">
+                    <FaPowerOff className="text-gray-500" />
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -57,14 +113,55 @@ function Header() {
           <button onClick={() => setToggle(!toggle)}>
             <IoMenu />
           </button>
+          {!token ? (
+            <Link
+              to="/login"
+              className="border border-black rounded px-3 ms-3 flex items-center"
+            >
+              <FaUser className="me-1" />
+              Login
+            </Link>
+          ) : (
+            <div>
+              <button
+                onClick={() => setDropDown(!dropDown)}
+                className="rounded p-1 hover:bg-gray-100"
+              >
+                <img
+                  width={"40px"}
+                  height={"40px"}
+                  style={{ borderRadius: "50%" }}
+                  src={
+                    dp == ""
+                      ? "https://static.vecteezy.com/system/resources/previews/019/879/186/non_2x/user-icon-on-transparent-background-free-png.png"
+                      : dp.startsWith("https://lh3.googleusercontent.com/")
+                        ? dp
+                        : `${axiosInstance.defaults.baseURL}/uploads/${dp}`
+                  }
+                  alt="Profile"
+                />
+              </button>
+              {/* dropdownmenu */}
+              {dropDown && (
+                <div className="absolute right-4 z-10 mt-2 w-40 bg-white shadow rounded ring-1 ring-black/5 p-2 focus:outline-hidden">
+                  {/* Profile */}
+                  <Link
+                    to={`/profile/${userId}`}
+                    className="flex items-center text-gray-600 text-sm px-3 py-2"
+                  >
+                    <FaGear className="text-gray-500" />
+                    Profile
+                  </Link>
 
-          <Link
-            to="/login"
-            className="border border-black rounded px-3 ms-3 flex items-center"
-          >
-            <FaUser className="me-1" />
-            Login
-          </Link>
+                  {/* Logout */}
+                  <button className="flex items-center text-gray-600 text-sm px-3 py-2">
+                    <FaPowerOff className="text-gray-500" />
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <ul className={toggle ? "flex flex-col" : "md:flex hidden"}>

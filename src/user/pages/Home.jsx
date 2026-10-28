@@ -1,9 +1,47 @@
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Header from "../components/Header";
 import { FaSearch } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { getHomeBooksAPI } from "../../services/allServices";
+import { searchContext } from "../../contextApi/ShareContext";
+import { ToastContainer, toast } from "react-toastify";
 
 function Home() {
+  const navigate=useNavigate()
+  const { searchKey, setSearchKey } = useContext(searchContext);
+  const [homeBooks, setHomeBooks] = useState([]);
+
+  console.log(searchKey);
+
+  useEffect(() => {
+    getHomeBooks();
+  }, []);
+
+  const getHomeBooks = async () => {
+    const result = await getHomeBooksAPI();
+
+    if (result.status == 200) {
+      setHomeBooks(result.data);
+    }
+  };
+
+  
+const handleSearch = () => {
+  if (!searchKey) {
+    toast.warning("Please Input a Book Title");
+  } else if (!sessionStorage.getItem("token")) {
+    toast.warning("Please Login To Explore More...!!!");
+
+    setTimeout(() => {
+      navigate("/login");
+    }, 2000);
+  } else if (searchKey && sessionStorage.getItem("token")) {
+    navigate("/books");
+  } else {
+    toast.error("Something Went Wrong!!!!");
+  }
+};
+
   return (
     <>
       <Header />
@@ -27,6 +65,7 @@ function Home() {
           {/* Search */}
           <div className="bg-white rounded-full p-2 w-1/3 flex mt-3">
             <input
+            onChange={(e)=>setSearchKey(e.target.value)}
               type="text"
               placeholder="Search A Book"
               className="w-full outline-none text-black px-2"
@@ -45,22 +84,30 @@ function Home() {
 
         <div className="md:grid grid-cols-4 md:my-0">
           {/* Card */}
-          <div className="shadow rounded p-3 m-4 md:my-0">
-            <img
-              width="100%"
-              height="300px"
-              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUvVOFZLhBNiHITtyWWOXryyw_GOYYR6qOw8iJTABy2g&s=10"
-              alt="Book"
-            />
+          {homeBooks.length > 0 ? (
+            homeBooks.map((book) => (
+              <div className="shadow rounded p-3 m-4 md:my-0">
+                <img
+                  width="100%"
+                  height="300px"
+                  src={book?.imageURL}
+                  alt="Book"
+                />
 
-            <div className="flex flex-col justify-center items-center mt-4">
-              <h2 className="text-blue-600 font-bold text-xl">Author</h2>
-
-              <h3 className="text-lg">Title</h3>
-
-              <p className="font-bold text-red-500">Price</p>
-            </div>
-          </div>
+                <div  key={book?._id} className="flex flex-col justify-center items-center mt-4">
+                  <h2 className="text-blue-600 font-bold text-x1">
+                    {book?.author}
+                  </h2>
+                  <h3 className="text-lg">{book?.title}</h3>
+                  <p className="font-bold text-red-500">
+                    {book?.discountPrice}
+                  </p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="font-bold text-center my-3">Loading....</p>
+          )}
         </div>
 
         {/* Button */}
@@ -140,6 +187,12 @@ function Home() {
           </p>
         </div>
       </section>
+       {/* toast container */}
+        <ToastContainer
+          position="top-center"
+          theme="colored"
+          autoClose={3000}
+        />
     </>
   );
 }

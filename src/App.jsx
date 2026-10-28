@@ -16,6 +16,8 @@ import Preloader from "./component/Preloader";
 import Footer from "./component/Footer";
 import { useState } from "react";
 import Books from "./user/pages/Books";
+import PaymentSuccess from "./user/pages/PaymentSuccess";
+import PaymentFail from "./user/pages/PaymentFail";
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -34,6 +36,8 @@ function App() {
 
         <Route path="/profile/:id" element={<Profile />} />
         <Route path="/book/:id" element={<View />} />
+        <Route path="/success" element={<PaymentSuccess />} />
+        <Route path="/fail" element={<PaymentFail/>} />
 
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin/resources" element={<AdminResource />} />

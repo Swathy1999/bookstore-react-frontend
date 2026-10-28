@@ -5,6 +5,20 @@ const axiosInstance = axios.create({
   timeout: 5000,
 });
 
+// request interceptor: handling token append to headers
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = sessionStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+     return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  },
+);
+
 // response interceptors: Handling Global error
 axiosInstance.interceptors.response.use(
   (response) => {
@@ -21,7 +35,7 @@ axiosInstance.interceptors.response.use(
       } else if (status == 500) {
         console.log("Server Error");
       } else if (error.request) {
-        console.log("No Response from Server")
+        console.log("No Response from Server");
         return error.request.response;
       } else {
         console.log("Error: ${error.message}");

@@ -1,12 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "../components/Header";
 import { FaCheckCircle } from "react-icons/fa";
 import Edit from "../components/Edit";
 import UploadBook from "../components/UploadBook";
 import BookStatus from "../components/BookStatus";
 import Purchase from "../components/Purchase";
+import axiosInstance from "../../api/axiosInstance";
+
 function Profile() {
   const [currentTab, setCurrentTab] = useState(1);
+  const [dp, setDp] = useState("");
+  const [bio, setBio] = useState("");
+  const [username, setUsername] = useState("");
+  useEffect(() => {
+    if (sessionStorage.getItem("token") && sessionStorage.getItem("user")) {
+      const user = JSON.parse(sessionStorage.getItem("user"));
+      setDp(user.picture);
+      setUsername(user?.username);
+      setBio(user?.bio);
+    }
+  }, []);
   return (
     <>
       <Header />
@@ -25,29 +38,40 @@ function Profile() {
         }}
         className="bg-white p-3"
       >
-        <img
-          style={{
-            width: "200px",
-            height: "200px",
-            borderRadius: "50%",
-          }}
-          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSUy-t00mImJn20OoJQGOZ-hpNBUnrKty6pmaC96C6r_Q&s=10"
-          alt="user"
-        />
+       
+<img
+  style={{
+    width: "200px",
+    height: "200px",
+    borderRadius: "50%",
+  }}
+  src={
+    dp == ""
+      ? "https://static.vecteezy.com/system/resources/previews/019/879/186/non_2x/user-icon-on-transparent-background-free-png.png"
+      : dp.startsWith("https://lh3.googleusercontent.com/")
+      ? dp
+      : `${axiosInstance.defaults.baseURL}/uploads/${dp}`
+  }
+  alt="user"
+/>
+
       </div>
 
       {/* Profile Details */}
       <div className="px-5">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
-            <h1 className="text-2xl font-black md:text-3xl">UserName</h1>
+            <h1 className="text-2xl font-black md:text-3xl">{username}</h1>
 
             <FaCheckCircle className="text-blue-700 ms-3" />
           </div>
 
-          <div><Edit/></div>
+          <div>
+            <Edit />
+          </div>
         </div>
-
+<p className="text-xl font-bold px-20 mt-5">
+          {bio ? bio : "No bio available"}</p>
         <p className="text-justify md:px-20 px-5 my-5">
           Lorem ipsum dolor sit amet consectetur adipisicing elit. Placeat non
           consequatur quibusdam numquam impedit accusamus, aperiam quidem amet
@@ -95,9 +119,21 @@ function Profile() {
           </p>
         </div>
         {/* tab content */}
-        {currentTab == 1 && <div><UploadBook/></div>}
-        {currentTab == 2 && <div><BookStatus/></div>}
-        {currentTab == 3 && <div><Purchase/></div>}
+        {currentTab == 1 && (
+          <div>
+            <UploadBook />
+          </div>
+        )}
+        {currentTab == 2 && (
+          <div>
+            <BookStatus />
+          </div>
+        )}
+        {currentTab == 3 && (
+          <div>
+            <Purchase />
+          </div>
+        )}
       </div>
     </>
   );
