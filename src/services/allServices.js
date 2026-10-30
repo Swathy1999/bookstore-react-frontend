@@ -93,3 +93,8 @@ return await apiService("GET", `/book-list`,{})
 export const editBookStatusAPI = async (id)=>{
 return await apiService ("PUT",`/book/${id}`,{})
 }
+
+// Get bookDetails from AI
+export const getBookDetailsAIAPI = async (title)=>{
+return await apiService("POST",`/book-ai`, {title})
+}

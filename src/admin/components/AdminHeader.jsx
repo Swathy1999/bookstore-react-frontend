@@ -1,7 +1,15 @@
-import React from "react";
+import React, { useContext } from "react";
 import { FaPowerOff } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { routeContext } from "../../contextApi/RouteGuard";
 
 function AdminHeader() {
+  const {role, setRole, authorisedUser, setAuthorisedUser}=useContext(routeContext)
+const navigate = useNavigate()
+const logout =()=>{ 
+  sessionStorage.clear() 
+  navigate('/')
+}
   return (
     <>
       {/* header top */}
@@ -17,7 +25,7 @@ function AdminHeader() {
           <h1 className="text-2xl font-bold ms-2">BOOKSTORE</h1>
         </div>
 
-        <button className="flex items-center px-3 py-2 bg-black text-white rounded border border-black hover:bg-white hover:text-black">
+        <button onClick={logout} className="flex items-center px-3 py-2 bg-black text-white rounded border border-black hover:bg-white hover:text-black">
           Logout <FaPowerOff className="ms-2" />
         </button>
       </div>

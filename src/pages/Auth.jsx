@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { FaUserAlt, FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import * as Yup from "yup";
@@ -12,8 +12,10 @@ import {
 import { ToastContainer, toast } from "react-toastify";
 import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
+import { routeContext } from "../contextApi/RouteGuard";
 
 function Auth({ insideRegister }) {
+  const {role, setRole, authorisedUser, setAuthorisedUser}=useContext(routeContext)
   const navigate = useNavigate();
   const [togglePassword, setTogglePassword] = useState(false);
 
@@ -60,7 +62,7 @@ function Auth({ insideRegister }) {
 
       console.log("Login response:", result);
 
-      if (result?.status === 200) {
+      if (result?.status == 200) {
         toast.success("Successfully logged in!");
 
         sessionStorage.setItem("token", result.data.token);
@@ -68,13 +70,15 @@ function Auth({ insideRegister }) {
           "user",
           JSON.stringify(result.data.user)
         );
-
+setAuthorisedUser(true)
         resetForm();
 
         setTimeout(() => {
-          if (result.data.user?.role === "admin") {
+          if (result.data.user?.role == "admin") {
+            setRole("admin")
             navigate("/admin");
           } else {
+            setRole("user")
             navigate("/");
           }
         }, 1500);
@@ -102,7 +106,7 @@ function Auth({ insideRegister }) {
 
       console.log("Register response:", result);
 
-      if (result?.status === 201 || result?.status === 200) {
+      if (result?.status == 201 || result?.status == 200) {
         toast.success("Successfully registered! Please log in.");
         resetForm();
 
@@ -154,19 +158,22 @@ function Auth({ insideRegister }) {
 
       console.log("Google login response:", result);
 
-      if (result?.status === 200 || result?.status === 201) {
+      if (result?.status == 200 || result?.status == 201) {
         toast.success("Google login successful!");
 
         sessionStorage.setItem("token", result.data.token);
         sessionStorage.setItem(
           "user",
           JSON.stringify(result.data.user)
+          
         );
-
+setAuthorisedUser(true)
         setTimeout(() => {
-          if (result.data.user?.role === "admin") {
+          if (result.data.user?.role == "admin") {
+            setRole("admin")
             navigate("/admin");
           } else {
+            setRole("user")
             navigate("/");
           }
         }, 1500);

@@ -1,9 +1,8 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
-import { addBookAPI } from "../../services/allServices";
-
+import { addBookAPI, getBookDetailsAIAPI } from "../../services/allServices";
+import useDebounce from "../../hooks/useDebounce";
 function UploadBook() {
   const initialBookDetails = {
     title: "",
@@ -23,6 +22,40 @@ function UploadBook() {
   const [bookDetails, setBookDetails] = useState(initialBookDetails);
   const [previewList, setPreviewList] = useState([]);
   const [preview, setPreview] = useState("");
+  const debounceTitleSearch = useDebounce(bookDetails.title, 1000);
+
+  useEffect(() => {
+    if (debounceTitleSearch) {
+      console.log("API call");
+      generateBookAbstractAI(debounceTitleSearch);
+    }
+  }, [debounceTitleSearch]);
+
+ 
+
+const generateBookAbstractAI = async () => {
+  try {
+    const result = await getBookDetailsAIAPI(debounceTitleSearch);
+    console.log("API Response:", result.data);
+
+    if (result.data?.content) {
+      setBookDetails({
+        ...bookDetails,
+        abstract: result.data.content.abstract,
+        isbn: result.data.content.isbn,
+        author: result.data.content.author
+      });
+    } else {
+      console.error("Abstract not found in API response:", result.data);
+    }
+  } catch (error) {
+    console.error(
+      "Error generating book abstract:",
+      error.response?.data || error.message
+    );
+  }
+};
+
 
   // Handle input changes
   const handleChange = (e) => {
@@ -46,9 +79,7 @@ function UploadBook() {
       return;
     }
 
-    const previews = images.map((file) =>
-      URL.createObjectURL(file)
-    );
+    const previews = images.map((file) => URL.createObjectURL(file));
 
     setBookDetails({
       ...bookDetails,
@@ -66,9 +97,7 @@ function UploadBook() {
 
     setBookDetails({
       ...bookDetails,
-      uploadImages: bookDetails.uploadImages.filter(
-        (_, i) => i !== index
-      ),
+      uploadImages: bookDetails.uploadImages.filter((_, i) => i !== index),
     });
 
     const updated = previewList.filter((_, i) => i !== index);
@@ -91,8 +120,10 @@ function UploadBook() {
   const handleAddBook = async () => {
     const { uploadImages, ...details } = bookDetails;
 
-    if (Object.values(details).some((value) => !value) ||
-        uploadImages.length == 0) {
+    if (
+      Object.values(details).some((value) => !value) ||
+      uploadImages.length == 0
+    ) {
       toast.info("Please fill all fields");
       return;
     }
@@ -124,9 +155,7 @@ function UploadBook() {
 
   return (
     <div className="p-10 my-20 mx-5 bg-gray-200 rounded">
-      <h1 className="text-center text-3xl font-medium">
-        Upload Book Details
-      </h1>
+      <h1 className="text-center text-3xl font-medium">Upload Book Details</h1>
 
       <div className="md:grid grid-cols-2 mt-10">
         <div className="px-3">
@@ -140,8 +169,11 @@ function UploadBook() {
           ].map(([name, placeholder]) => (
             <input
               key={name}
-              type={["pages", "price", "discountPrice"].includes(name)
-                ? "number" : "text"}
+              type={
+                ["pages", "price", "discountPrice"].includes(name)
+                  ? "number"
+                  : "text"
+              }
               name={name}
               value={bookDetails[name]}
               onChange={handleChange}
@@ -179,8 +211,11 @@ function UploadBook() {
 
           <div className="text-center mt-5">
             <img
-              src={preview || bookDetails.imageURL ||
-                "https://www.freeiconspng.com/uploads/upload-icon-15.png"}
+              src={
+                preview ||
+                bookDetails.imageURL ||
+                "https://www.freeiconspng.com/uploads/upload-icon-15.png"
+              }
               alt="Book Preview"
               className="w-48 h-48 object-contain mx-auto"
             />
@@ -189,7 +224,6 @@ function UploadBook() {
               <label className="inline-block mt-4 bg-blue-500 text-white p-3 rounded cursor-pointer">
                 <FaPlus className="inline mr-2" />
                 Upload Images ({previewList.length}/3)
-
                 <input
                   type="file"
                   accept="image/*"

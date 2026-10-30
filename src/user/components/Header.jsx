@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaInstagram, FaTwitter, FaFacebookF, FaUser } from "react-icons/fa";
 import { IoMenu } from "react-icons/io5";
 import { FaGear } from "react-icons/fa6";
@@ -7,6 +7,7 @@ import { FaPowerOff } from "react-icons/fa6";
 import axiosInstance from "../../api/axiosInstance";
 
 function Header() {
+  const navigate = useNavigate();
   const [toggle, setToggle] = useState(false);
   const [dp, setDp] = useState("");
   const [token, setToken] = useState("");
@@ -23,6 +24,15 @@ function Header() {
     }
   }, [token]);
 
+  const logout = () => {
+    sessionStorage.clear();
+    setToggle(false);
+    setToken("");
+    setDp("");
+    setUserId("");
+    setDropDown(false);
+    navigate("/");
+  };
   return (
     <>
       {/* Header Top Part */}
@@ -94,7 +104,10 @@ function Header() {
                   </Link>
 
                   {/* Logout */}
-                  <button className="flex items-center text-gray-600 text-sm px-3 py-2">
+                  <button
+                    onClick={logout}
+                    className="flex items-center text-gray-600 text-sm px-3 py-2"
+                  >
                     <FaPowerOff className="text-gray-500" />
                     Logout
                   </button>
@@ -154,7 +167,10 @@ function Header() {
                   </Link>
 
                   {/* Logout */}
-                  <button className="flex items-center text-gray-600 text-sm px-3 py-2">
+                  <button
+                    onClick={logout}
+                    className="flex items-center text-gray-600 text-sm px-3 py-2"
+                  >
                     <FaPowerOff className="text-gray-500" />
                     Logout
                   </button>
